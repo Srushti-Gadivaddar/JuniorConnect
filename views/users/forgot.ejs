@@ -1,0 +1,17 @@
+<% layout("/layouts/boilerplate") %>
+<style>.card-auth{max-width:520px;margin:40px auto;padding:28px;border-radius:12px;background:var(--card);box-shadow:0 10px 30px rgba(0,0,0,0.06)}</style>
+
+<div class="card-auth">
+  <h3>Forgot Password</h3>
+  <% if (typeof message !== 'undefined') { %>
+    <div class="alert alert-info"><%= message %></div>
+  <% } %>
+
+  <form action="/forgot-password" method="POST">
+    <div class="mb-3">
+      <label>Email</label>
+      <input type="email" name="email" class="form-control" placeholder="email@example.com" required>
+    </div>
+    <button class="btn btn-primary w-100">Send OTP</button>
+  </form>
+</div>

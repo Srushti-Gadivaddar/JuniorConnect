@@ -1,0 +1,740 @@
+<!-- <% layout("/layouts/boilerplate") %>
+
+<%
+function linkMentions(text, mentions) {
+    return text.replace(/@([\w_]+)/g, function(match, username) {
+        const prof = mentions.find(p => p.username === username);
+        if (!prof) return match;
+        return `<a href="/profiles/${prof._id}" class="text-primary">@${username}</a>`;
+    });
+}
+%>
+
+<div class="container mt-4">
+
+    <h2><%= question.title %></h2>
+
+    <small class="text-muted">
+        Asked by 
+        <a href="/profiles/<%= question.author._id %>">
+            <%= question.author.name %>
+        </a>
+        on <%= question.createdAt.toDateString() %>
+    </small>
+
+    <hr>
+
+
+    <div class="mb-3">
+        <%- question.body %>
+    </div>
+
+ 
+    <div class="mt-3">
+        <% question.tags.forEach(tag => { %>
+            <a href="/questions/tag/<%= tag %>" class="badge bg-primary me-1">#<%= tag %></a>
+        <% }) %>
+    </div>
+
+    <% if (question.images?.length) { %>
+        <h5>Images</h5>
+        <div class="d-flex flex-wrap">
+            <% question.images.forEach(img => { %>
+                <img src="<%= img.url %>" class="img-thumbnail m-2"
+                     style="width:150px; cursor:pointer"
+                     onclick="openPreview('<%= img.url %>')" />
+            <% }) %>
+        </div>
+    <% } %>
+
+ 
+    <% if (question.files?.length) { %>
+        <h5>Files</h5>
+        <ul>
+            <% question.files.forEach(file => { %>
+                <li><a href="<%= file.url %>" target="_blank"><%= file.filename %></a></li>
+            <% }) %>
+        </ul>
+    <% } %>
+
+    
+    <% if (currentProfile && currentProfile._id.toString() === question.author._id.toString()) { %>
+        <a href="/questions/<%= question._id %>/edit" class="btn btn-warning btn-sm">Edit</a>
+        <form action="/questions/<%= question._id %>?_method=DELETE" method="POST" class="d-inline">
+            <button class="btn btn-danger btn-sm">Delete</button>
+        </form>
+    <% } %>
+
+    <hr>
+
+  
+    <h4>Your Answer</h4>
+
+    <button type="button" id="aiBtn" class="btn btn-outline-primary mb-2">
+            
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="black" class="bi bi-robot" viewBox="0 0 16 16">
+    <path d="M8 0a2 2 0 0 0-2 2v1H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2V2a2 2 0 0 0-2-2zm-1 2a1 1 0 0 1 2 0v1H7V2zm-3 3h8v7H4V5zm1 2a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm5 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+    </svg>
+    Suggest Answer with AI
+    <span id="aiSpinner" class="spinner-border spinner-border-sm ms-2" style="display:none"></span>
+    </button>
+
+    <form action="/questions/<%= question._id %>/answers" method="POST" enctype="multipart/form-data">
+
+       
+        <textarea name="text" id="editor" class="form-control" rows="5"></textarea>
+
+        <label class="mt-2">Upload Images</label>
+        <input type="file" name="images" multiple class="form-control">
+
+        <label class="mt-2">Upload Files</label>
+        <input type="file" name="files" multiple class="form-control">
+
+        <button class="btn btn-primary mt-3">Post Answer</button>
+    </form>
+
+    <hr>
+
+    <h3><%= answerCount %> Answers</h3>
+
+    <% answers.forEach(answer => { %>
+        <div class="card p-3 mt-3">
+
+         
+            <div class="text-muted mb-2">
+                <a href="/profiles/<%= answer.author._id %>">
+                    <%= answer.author.name %>
+                </a>
+                • <%= answer.createdAt.toDateString() %>
+            </div>
+
+            <div>
+                <%- linkMentions(answer.text, answer.mentions) %>
+            </div>
+
+            <% if (answer.mentions?.length) { %>
+                <div class="mt-2">
+                    <strong>Mentioned:</strong>
+                    <% answer.mentions.forEach(u => { %>
+                        <a href="/profiles/<%= u._id %>" class="badge bg-secondary me-1">
+                            @<%= u.username %>
+                        </a>
+                    <% }) %>
+                </div>
+            <% } %>
+
+            <% if (answer.images?.length) { %>
+                <div class="d-flex flex-wrap mt-2">
+                    <% answer.images.forEach(img => { %>
+                        <img src="<%= img.url %>" class="img-thumbnail m-1"
+                             style="width:120px; cursor:pointer"
+                             onclick="openPreview('<%= img.url %>')" />
+                    <% }) %>
+                </div>
+            <% } %>
+
+            <% if (answer.files?.length) { %>
+                <ul class="mt-2">
+                    <% answer.files.forEach(file => { %>
+                        <li><a href="<%= file.url %>" target="_blank"><%= file.filename %></a></li>
+                    <% }) %>
+                </ul>
+            <% } %>
+
+           
+            <% if (currentProfile && currentProfile._id.toString() === answer.author._id.toString()) { %>
+                <a href="/questions/<%= question._id %>/answers/<%= answer._id %>/edit"
+                   class="btn btn-warning btn-sm">Edit</a>
+
+                <form action="/questions/<%= question._id %>/answers/<%= answer._id %>?_method=DELETE"
+                      method="POST" class="d-inline">
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            <% } %>
+
+            <form action="/questions/<%= question._id %>/answers/<%= answer._id %>/replies" 
+                  method="POST" class="mt-3">
+                <textarea name="text" class="form-control" rows="2"
+                          placeholder="Write a reply..." required></textarea>
+                <button class="btn btn-secondary btn-sm mt-2">Reply</button>
+            </form>
+
+            <% if (answer.replies?.length) { %>
+                <div class="mt-3 ms-3">
+                    <% answer.replies.forEach(r => { %>
+                        <div class="border p-2 rounded mb-2 bg-light">
+                            <strong>
+                                <a href="/profiles/<%= r.author._id %>"><%= r.author.name %></a>
+                            </strong>
+                            <small class="text-muted">• <%= r.createdAt.toDateString() %></small>
+
+                            <div class="mt-1"><%- linkMentions(r.text, r.mentions) %></div>
+
+                            <% if (currentProfile && currentProfile._id.toString() === r.author._id.toString()) { %>
+                                <a href="/questions/<%= question._id %>/answers/<%= answer._id %>/replies/<%= r._id %>/edit"
+                                   class="btn btn-warning btn-sm mt-1">Edit</a>
+
+                                <form action="/questions/<%= question._id %>/answers/<%= answer._id %>/replies/<%= r._id %>?_method=DELETE"
+                                      method="POST" class="d-inline">
+                                    <button class="btn btn-danger btn-sm mt-1">Delete</button>
+                                </form>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+
+        </div>
+    <% }) %>
+
+</div>
+
+
+<div id="preview"
+     style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.8); justify-content:center; align-items:center;">
+    <img id="preview-img" style="max-width:95%; max-height:95%;">
+</div>
+
+<script>
+function openPreview(src) {
+    document.getElementById("preview").style.display = "flex";
+    document.getElementById("preview-img").src = src;
+}
+document.getElementById("preview").onclick = () => {
+    document.getElementById("preview").style.display = "none";
+};
+</script>
+
+
+
+<script>
+const aiBtn = document.getElementById("aiBtn");
+const aiSpinner = document.getElementById("aiSpinner");
+const editor = document.getElementById("editor");
+
+aiBtn.addEventListener("click", async () => {
+  aiSpinner.style.display = "inline-block"; // show spinner
+
+  const questionText = document.querySelector("h2").innerText;
+  const res = await fetch("/ai/generate-answer", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: questionText })
+  });
+
+  const data = await res.json();
+  if (data.success) {
+    editor.value = data.answer;
+  }
+
+  aiSpinner.style.display = "none"; // hide spinner
+});
+
+</script>
+
+
+ -->
+
+ <% layout("/layouts/boilerplate") %>
+
+<%
+// mentions helper (kept server-side so nothing client-side changes)
+function linkMentions(text, mentions) {
+  if (!text) return "";
+  try {
+    if (!mentions || mentions.length === 0) return text;
+    return text.replace(/@([\w_]+)/g, function(match, username){
+      const prof = mentions.find(p => p.username === username);
+      if (!prof) return match;
+      return `<a href="/profiles/${prof._id}" class="mention-link">@${username}</a>`;
+    });
+  } catch (e) {
+    return text;
+  }
+}
+%>
+
+<style>
+:root{
+  --chat-bg: #f5f7fa;
+  --bubble-left: #ffffff;
+  --bubble-right: #d1e7ff;
+  --bubble-shadow: rgba(0,0,0,0.15);
+  --header-bg: #ffffff;
+  --input-bg: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --muted: #94a3b8;
+  --card-radius: 14px;
+}
+
+[data-theme="dark"]{
+  --chat-bg: #0f172a;
+  --bubble-left: #1e293b;
+  --bubble-right: #334155;
+  --bubble-shadow: rgba(255,255,255,0.05);
+  --header-bg: #1e293b;
+  --input-bg: #1e293b;
+  --text-primary: #e2e8f0;
+  --text-secondary: #cbd5e1;
+  --muted: #94a3b8;
+}
+
+/* page */
+body { background: var(--chat-bg); color: var(--text-primary); font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial; }
+
+.container.q-page { max-width: 1000px; margin: 32px auto; padding: 0 18px; }
+
+/* top bar */
+.q-card {
+  background: var(--bubble-left);
+  border-radius: var(--card-radius);
+  box-shadow: 0 6px 20px var(--bubble-shadow);
+  padding: 20px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.q-top {
+  display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap;
+}
+
+.q-meta { color: var(--text-secondary); font-size: 13px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+.q-title { font-size: 1.6rem; font-weight:700; margin:10px 0; color:var(--text-primary); }
+
+/* body */
+.q-body { font-size: 1rem; line-height:1.6; color:var(--text-primary); margin-top:8px; }
+
+/* tags */
+.tag {
+  display:inline-block;
+  background: transparent;
+  border: 1px solid rgba(0,0,0,0.06);
+  color: var(--text-secondary);
+  padding:6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  margin-right:8px;
+  text-decoration:none;
+}
+
+/* media previews */
+.media-preview { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+.media-preview img { width:130px; height:86px; object-fit:cover; border-radius:10px; cursor:pointer; box-shadow:0 4px 12px var(--bubble-shadow); transition:transform .14s ease; }
+.media-preview img:hover { transform:translateY(-4px); }
+
+/* files */
+.file-pill { display:inline-flex; gap:8px; align-items:center; background:var(--bubble-right); padding:8px 10px; border-radius:10px; color:var(--text-primary); font-size:14px; margin:6px 8px 6px 0; text-decoration:none; }
+
+/* action icon buttons */
+.icon-btn {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:36px; height:36px; border-radius:10px; border:none; cursor:pointer;
+  background:transparent; color:var(--text-secondary); transition:all .12s ease; font-size:16px;
+}
+.icon-btn:hover { background: rgba(0,0,0,0.04); color: var(--text-primary); transform:translateY(-2px); }
+
+/* AI button style - keep logic same but style modern */
+#aiBtn{
+  display:inline-flex; align-items:center; gap:10px; border-radius:10px; padding:8px 12px;
+  border:1px solid rgba(0,0,0,0.06); background:transparent; color:var(--text-primary); cursor:pointer;
+}
+#aiBtn svg { opacity:0.9; }
+
+/* answer block */
+.answers { margin-top:18px; }
+.answer-card {
+  background: var(--bubble-left);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 6px 18px var(--bubble-shadow);
+  position:relative;
+}
+.ans-header { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.ans-author { color:var(--text-secondary); font-size:13px; }
+.ans-body { margin-top:10px; color:var(--text-primary); line-height:1.5; }
+
+/* replies collapsed container */
+.replies-wrap { margin-top:12px; }
+.reply-card { background: rgba(0,0,0,0.02); border-radius:10px; padding:10px; margin-bottom:8px; }
+.reply-meta { color:var(--text-secondary); font-size:12px; }
+
+/* reply toggle button */
+.reply-toggle {
+  background: transparent; border-radius:8px; padding:6px 10px; border:1px solid rgba(0,0,0,0.06); cursor:pointer; color:var(--text-primary);
+}
+
+/* reply form hidden by default */
+.reply-form { display:none; margin-top:10px; }
+
+/* mention link */
+.mention-link { color: var(--text-primary); font-weight:600; text-decoration:none; }
+
+/* lightbox slider */
+#lightbox {
+  display:none; position:fixed; inset:0; background: rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center;
+}
+#lightbox .lb-img { max-width:92%; max-height:92%; border-radius:10px; box-shadow:0 10px 40px rgba(0,0,0,0.6); }
+.lb-close, .lb-prev, .lb-next {
+  position:fixed; color:#fff; background:transparent; border:none; font-size:26px; cursor:pointer; padding:8px 10px; border-radius:8px;
+}
+.lb-close { top:24px; right:28px; font-size:28px; }
+.lb-prev { left:20px; top:50%; transform:translateY(-50%); }
+.lb-next { right:20px; top:50%; transform:translateY(-50%); }
+
+/* responsive tweaks */
+@media (max-width:720px){
+  .media-preview img { width:120px; height:80px; }
+  .q-title { font-size:1.3rem; }
+  .icon-btn { width:34px; height:34px; }
+}
+
+/* ---------------- Responsive Enhancements ---------------- */
+@media (max-width: 1024px) {
+  .container.q-page { padding: 0 12px; }
+  .q-card { padding: 16px; }
+  .q-top { flex-direction: column; gap: 10px; }
+  .q-title { font-size: 1.4rem; }
+  .q-body { font-size: 0.95rem; }
+  .media-preview img { width: 120px; height: 80px; }
+  .file-pill { font-size: 13px; padding: 6px 8px; }
+  .icon-btn { width: 34px; height: 34px; font-size: 15px; }
+}
+
+@media (max-width: 720px) {
+  .container.q-page { margin: 16px auto; padding: 0 10px; }
+  .q-title { font-size: 1.2rem; }
+  .q-body { font-size: 0.9rem; }
+  .media-preview img { width: 100px; height: 70px; }
+  .file-pill { font-size: 12px; padding: 5px 7px; }
+  .icon-btn { width: 30px; height: 30px; font-size: 14px; }
+  .answers h3 { font-size: 1.1rem; }
+  .ans-body { font-size: 0.9rem; }
+  .reply-card { padding: 8px; }
+  .reply-toggle { padding: 5px 8px; font-size: 13px; }
+  #aiBtn { padding: 6px 10px; font-size: 14px; gap:6px; }
+}
+
+@media (min-width: 1200px) {
+  .container.q-page { max-width: 1200px; }
+  .q-title { font-size: 1.8rem; }
+  .q-body { font-size: 1rem; }
+  .media-preview img { width: 140px; height: 90px; }
+  .file-pill { font-size: 14px; padding: 7px 10px; }
+  .icon-btn { width: 38px; height: 38px; font-size: 17px; }
+}
+
+</style>
+
+<div class="container q-page">
+
+  <!-- QUESTION CARD -->
+  <div class="q-card" id="question-card">
+    <div class="q-top">
+      <div>
+        <div class="q-meta">
+          <span>Asked by <a href="/profiles/<%= question.author._id %>" style="color:var(--text-primary); text-decoration:none;"><%= question.author.name %></a></span>
+          <span>•</span>
+          <span><%= question.createdAt.toDateString() %></span>
+        </div>
+
+        <div class="q-title"><%= question.title %></div>
+        <div class="q-body"><%- question.body %></div>
+
+        <% if (question.tags && question.tags.length) { %>
+          <div style="margin-top:12px;">
+            <% question.tags.forEach(tag => { %>
+              <a class="tag" href="/questions/tag/<%= tag %>">#<%= tag %></a>
+            <% }) %>
+          </div>
+        <% } %>
+
+        <% if (question.images?.length) { %>
+          <div class="media-preview" data-group="q-<%= question._id %>">
+            <% question.images.forEach(img => { %>
+              <img src="<%= img.url %>" data-src="<%= img.url %>" data-group="q-<%= question._id %>" alt="img">
+            <% }) %>
+          </div>
+        <% } %>
+
+        <% if (question.files?.length) { %>
+          <div style="margin-top:10px;">
+            <% question.files.forEach(f => { %>
+              <a class="file-pill" href="<%= f.url %>" target="_blank">📄 <%= f.filename %></a>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+
+      <div style="display:flex; gap:8px; align-items:flex-start;">
+        <% if (currentProfile && currentProfile._id.toString() === question.author._id.toString()) { %>
+          <a href="/questions/<%= question._id %>/edit" title="Edit" class="icon-btn" aria-label="Edit">
+            <!-- pencil SVG -->
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M3 21v-3l11-11 3 3L6 21H3zM20.7 7.3a1 1 0 0 0 0-1.4l-2.6-2.6a1 1 0 0 0-1.4 0l-1.8 1.8 3.9 3.9 1.9-1.7z" fill="currentColor"></path></svg>
+          </a>
+
+          <form action="/questions/<%= question._id %>?_method=DELETE" method="POST" style="display:inline;">
+            <button type="submit" class="icon-btn" title="Delete" aria-label="Delete">
+              <!-- trash -->
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M6 7h12v13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7zm3-4h6l1 1H8l1-1z" fill="currentColor"/></svg>
+            </button>
+          </form>
+        <% } %>
+
+        <!-- Placeholder for other top controls if needed -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ANSWER FORM -->
+  <div class="q-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+      <div style="display:flex; gap:12px; align-items:center;">
+        <h4 style="margin:0">Your Answer</h4>
+        <!-- AI button preserved -->
+        <button id="aiBtn" type="button" style="border-radius:8px; padding:8px 10px; background:transparent; border:1px solid rgba(0,0,0,0.06); cursor:pointer;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a2 2 0 0 0-2 2v1H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2V2a2 2 0 0 0-2-2zm-1 2a1 1 0 0 1 2 0v1H7V2z"/></svg>
+          <span style="margin-left:6px">Suggest Answer with AI</span>
+          <span id="aiSpinner" style="display:none; margin-left:8px;" class="spinner-border spinner-border-sm"></span>
+        </button>
+      </div>
+    </div>
+
+    <form action="/questions/<%= question._id %>/answers" method="POST" enctype="multipart/form-data">
+      <textarea id="editor" name="text" rows="5" style="width:100%; margin-top:10px; border-radius:10px; padding:12px; border:1px solid rgba(0,0,0,0.06); background:var(--input-bg); color:var(--text-primary);" placeholder="Write your answer..."></textarea>
+
+      <div style="display:flex; gap:12px; margin-top:12px; flex-wrap:wrap;">
+        <label style="cursor:pointer;" class="file-pill">📷 Add images
+          <input type="file" name="images" multiple style="display:none;">
+        </label>
+
+        <label style="cursor:pointer;" class="file-pill">📄 Add files
+          <input type="file" name="files" multiple style="display:none;">
+        </label>
+
+        <button type="submit" style="margin-left:auto; background:var(--bubble-right); color:var(--text-primary); border:none; padding:10px 14px; border-radius:10px; font-weight:600;">Post Answer</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ANSWERS LIST -->
+  <div class="answers">
+    <h3 style="margin-bottom:12px;"><%= answerCount %> Answers</h3>
+
+    <% answers.forEach(function(answer, aiIndex){ %>
+      <div class="answer-card" id="answer-<%= answer._id %>">
+
+        <div class="ans-header">
+          <div>
+            <div class="ans-author">
+              <a href="/profiles/<%= answer.author._id %>" style="color:var(--text-primary); text-decoration:none; font-weight:600;"><%= answer.author.name %></a>
+              <span style="color:var(--text-secondary); margin-left:8px;">• <%= answer.createdAt.toDateString() %></span>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px; align-items:center;">
+            <!-- Reply toggle button -->
+            <button class="reply-toggle" data-target="reply-form-<%= answer._id %>">Reply</button>
+
+            <% if (currentProfile && currentProfile._id.toString() === answer.author._id.toString()) { %>
+              <a href="/questions/<%= question._id %>/answers/<%= answer._id %>/edit" title="Edit" class="icon-btn" aria-label="Edit answer">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21v-3l11-11 3 3L6 21H3zM20.7 7.3a1 1 0 0 0 0-1.4l-2.6-2.6a1 1 0 0 0-1.4 0l-1.8 1.8 3.9 3.9 1.9-1.7z"/></svg>
+              </a>
+
+              <form action="/questions/<%= question._1 %>/answers/<%= answer._id %>?_method=DELETE" method="POST" style="display:inline;">
+                <!-- keep user's original action; NOTE: it's purposely same as they have -->
+                <button type="submit" title="Delete answer" class="icon-btn" aria-label="Delete answer">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 7h12v13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7zm3-4h6l1 1H8l1-1z"/></svg>
+                </button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="ans-body"><%- linkMentions(answer.text, answer.mentions) %></div>
+
+        <% if (answer.mentions && answer.mentions.length) { %>
+          <div style="margin-top:8px;">
+            <strong style="color:var(--text-secondary); font-size:13px;">Mentioned:</strong>
+            <% answer.mentions.forEach(function(u){ %>
+              <a href="/profiles/<%= u._id %>" class="tag" style="border:1px solid rgba(0,0,0,0.06);"><%= '@' + u.username %></a>
+            <% }) %>
+          </div>
+        <% } %>
+
+        <% if (answer.images && answer.images.length) { %>
+          <div class="media-preview" data-group="a-<%= answer._id %>" style="margin-top:12px;">
+            <% answer.images.forEach(function(img){ %>
+              <img src="<%= img.url %>" data-src="<%= img.url %>" data-group="a-<%= answer._id %>" alt="ans-img">
+            <% }) %>
+          </div>
+        <% } %>
+
+        <% if (answer.files && answer.files.length) { %>
+          <div style="margin-top:10px;">
+            <% answer.files.forEach(function(f){ %>
+              <a class="file-pill" href="<%= f.url %>" target="_blank">📄 <%= f.filename %></a>
+            <% }) %>
+          </div>
+        <% } %>
+
+        <!-- hidden reply form (opened by Reply button) -->
+        <div class="reply-form" id="reply-form-<%= answer._id %>">
+          <form action="/questions/<%= question._id %>/answers/<%= answer._id %>/replies" method="POST" enctype="multipart/form-data">
+            <textarea name="text" rows="2" style="width:100%; border-radius:10px; padding:10px; border:1px solid rgba(0,0,0,0.06); margin-top:8px;" placeholder="Write a reply..." required></textarea>
+            <div style="display:flex; gap:10px; align-items:center; margin-top:8px;">
+              <button type="submit" class="file-pill" style="margin-left:auto; background:var(--bubble-right); border:none;">Reply</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- replies list (if any) -->
+        <% if (answer.replies && answer.replies.length) { %>
+          <div class="replies-wrap" id="replies-<%= answer._id %>">
+            <% answer.replies.forEach(function(r){ %>
+              <div class="reply-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <strong style="color:var(--text-primary);"><a href="/profiles/<%= r.author._id %>" style="text-decoration:none; color:var(--text-primary);"><%= r.author.name %></a></strong>
+                    <div class="reply-meta"><%= r.createdAt.toDateString() %></div>
+                  </div>
+                  <% if (currentProfile && currentProfile._id.toString() === r.author._id.toString()) { %>
+                    <div style="display:flex; gap:8px;">
+                      <a href="/questions/<%= question._id %>/answers/<%= answer._id %>/replies/<%= r._id %>/edit" class="icon-btn" title="Edit reply"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21v-3l11-11 3 3L6 21H3z"/></svg></a>
+                      <form action="/questions/<%= question._id %>/answers/<%= answer._id %>/replies/<%= r._id %>?_method=DELETE" method="POST">
+                        <button class="icon-btn" title="Delete reply" type="submit"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 7h12v13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7zm3-4h6l1 1H8l1-1z"/></svg></button>
+                      </form>
+                    </div>
+                  <% } %>
+                </div>
+
+                <div style="margin-top:8px; color:var(--text-primary);"><%- linkMentions(r.text, r.mentions) %></div>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+
+      </div>
+    <% }) %>
+
+  </div>
+</div>
+
+<!-- LIGHTBOX / SLIDER -->
+<div id="lightbox" aria-hidden="true" role="dialog">
+  <button class="lb-close" aria-label="Close" title="Close">&times;</button>
+  <button class="lb-prev" aria-label="Previous" title="Previous">&#10094;</button>
+  <img class="lb-img" src="" alt="preview">
+  <button class="lb-next" aria-label="Next" title="Next">&#10095;</button>
+</div>
+
+<script>
+/* ---------- Reply toggle: open/close reply form on click ---------- */
+document.querySelectorAll('.reply-toggle').forEach(btn=>{
+  btn.addEventListener('click', ()=> {
+    const id = btn.getAttribute('data-target');
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+    // scroll into view when opened
+    if(el.style.display === 'block') el.scrollIntoView({behavior:'smooth', block:'center'});
+  });
+});
+
+/* ---------- Lightbox slider per-group ---------- */
+const lightbox = document.getElementById('lightbox');
+const lbImg = lightbox.querySelector('.lb-img');
+const lbClose = lightbox.querySelector('.lb-close');
+const lbPrev = lightbox.querySelector('.lb-prev');
+const lbNext = lightbox.querySelector('.lb-next');
+
+let currentGroup = [];
+let currentIndex = 0;
+
+function openLightboxFrom(imgEl) {
+  const group = imgEl.dataset.group || null;
+  currentGroup = Array.from(document.querySelectorAll(`img[data-group="${group}"]`));
+  currentIndex = currentGroup.indexOf(imgEl);
+  if (currentIndex < 0) currentIndex = 0;
+  showLB();
+}
+
+function showLB() {
+  if (!currentGroup.length) return;
+  lbImg.src = currentGroup[currentIndex].dataset.src || currentGroup[currentIndex].src;
+  lightbox.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLB() {
+  lightbox.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function nextLB() {
+  if(!currentGroup.length) return;
+  currentIndex = (currentIndex + 1) % currentGroup.length;
+  showLB();
+}
+
+function prevLB() {
+  if(!currentGroup.length) return;
+  currentIndex = (currentIndex - 1 + currentGroup.length) % currentGroup.length;
+  showLB();
+}
+
+/* bind clicks on media thumbnails */
+document.querySelectorAll('.media-preview img').forEach(img => {
+  img.addEventListener('click', (e) => openLightboxFrom(e.currentTarget));
+});
+
+/* lightbox controls */
+lbClose.addEventListener('click', closeLB);
+lbNext.addEventListener('click', nextLB);
+lbPrev.addEventListener('click', prevLB);
+
+/* close on overlay click */
+lightbox.addEventListener('click', (e) => {
+  if (e.target === lightbox) closeLB();
+});
+
+/* keyboard navigation */
+document.addEventListener('keydown', (e)=>{
+  if (lightbox.style.display !== 'flex') return;
+  if (e.key === 'ArrowRight') nextLB();
+  if (e.key === 'ArrowLeft') prevLB();
+  if (e.key === 'Escape') closeLB();
+});
+
+/* ---------- AI button script (kept unchanged logically) ---------- */
+const aiBtn = document.getElementById("aiBtn");
+const aiSpinner = document.getElementById("aiSpinner");
+const editor = document.getElementById("editor");
+
+if (aiBtn) {
+  aiBtn.addEventListener("click", async () => {
+    if (!aiSpinner) return;
+    aiSpinner.style.display = "inline-block"; // show spinner
+
+    const questionText = document.querySelector("h2") ? document.querySelector("h2").innerText : document.querySelector('.q-title').innerText;
+    try {
+      const res = await fetch("/ai/generate-answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: questionText })
+      });
+      const data = await res.json();
+      if (data.success && editor) editor.value = data.answer;
+    } catch (err) {
+      console.error("AI fetch error", err);
+    } finally {
+      aiSpinner.style.display = "none"; // hide spinner
+    }
+  });
+}
+</script>
+
+

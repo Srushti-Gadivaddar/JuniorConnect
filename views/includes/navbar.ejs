@@ -1,0 +1,376 @@
+ <style>
+:root {
+  --bg: #eef0f5;
+  --text: #0b2347;
+  --nav: #ffffff;
+  --btn: #2f4fdd;
+  --btn-text: #ffffff;
+  --search-bg: #e5e9ff;
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --text: #e2e8f0;
+  --nav: #1e293b;
+  --btn: #334155;
+  --btn-text: #e2e8f0;
+  --search-bg: #2a3550;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", sans-serif;
+}
+
+/* NAVBAR */
+.navbar {
+  width: 100%;
+  background: var(--nav);
+  padding: 14px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* SEARCH BOX */
+.search-box {
+  background: var(--search-bg);
+  padding: 8px 14px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.search-box svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--text);
+}
+
+/* NAV LINKS */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.nav-links a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+/* THEME BUTTON */
+.theme-toggle {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.theme-toggle svg {
+  width: 26px;
+  height: 26px;
+  stroke: var(--text);
+}
+
+/* HAMBURGER */
+.menu-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: none;
+}
+
+.menu-btn svg {
+  width: 28px;
+  height: 28px;
+  stroke: var(--text);
+}
+
+/* SIDE PANEL */
+.side-panel {
+  width: 270px;
+  background: var(--nav);
+  height: 100vh;
+  padding: 22px;
+  position: fixed;
+  right: -300px;
+  top: 0;
+  transition: 0.4s;
+  box-shadow: -4px 0 15px rgba(0,0,0,0.1);
+  z-index: 999;
+}
+
+.side-panel a {
+  display: block;
+  margin: 18px 0;
+  font-size: 18px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+/* SHOW SEARCH + THEME ON MOBILE */
+@media (max-width: 992px) {
+  .nav-links a {
+    display: none;
+  }
+
+  .search-box {
+    display: none;
+  }
+
+  .menu-btn {
+    display: block;
+  }
+}
+
+/* MOBILE SEARCH + THEME INSIDE SIDE PANEL */
+.mobile-group {
+  padding: 12px 0;
+  border-bottom: 1px solid #ccc3;
+}
+
+.mobile-search {
+  background: var(--search-bg);
+  padding: 10px 14px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.mobile-search input {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+}
+
+</style>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="logo">Junior Connect</div>
+
+  <!-- SEARCH -->
+  <div id="liveSearch" class="search-box" style="position:relative; max-width:320px;">
+    <svg fill="none" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="7"></circle>
+      <line x1="16.5" y1="16.5" x2="22" y2="22"></line>
+    </svg>
+    <input id="searchInput" type="text" placeholder="Search people & questions..." autocomplete="off">
+    <button id="clearSearch" style="display:none; background:transparent; border:none; cursor:pointer; font-size:16px;">✕</button>
+
+   <div id="searchResults" style="
+        display:none; 
+        position:absolute; 
+        top:46px; left:0; right:0;
+        z-index:2000;
+        background:var(--nav);
+        border-radius:8px;
+        box-shadow:0 8px 30px rgba(0,0,0,0.15);
+        max-height:420px;
+        overflow:auto;">
+      <div id="searchResultsInner"></div>
+    </div>
+  </div>
+
+  <!-- NAV LINKS -->
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/questions/new">Ask a Questions</a>
+    <a href="/profiles/new">Create a Profile</a>
+    <% if (!currentUser) { %>
+      <a href="/login">Login</a>
+      <a href="/signup">Signup</a>
+    <% } else { %>
+      <a href="/logout">Logout</a>
+    <% } %>
+
+    <!-- THEME BUTTON -->
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <svg id="themeIcon" fill="none" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="5"></circle>
+      </svg>
+    </button>
+
+    <!-- HAMBURGER -->
+    <button class="menu-btn" onclick="openMenu()">
+      <svg fill="none" stroke-width="2" viewBox="0 0 24 24">
+        <line x1="4" y1="6" x2="20" y2="6"></line>
+        <line x1="4" y1="12" x2="20" y2="12"></line>
+        <line x1="4" y1="18" x2="20" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- SIDE PANEL -->
+<div class="side-panel" id="sidePanel">
+
+  <!-- SEARCH IN MOBILE -->
+  <div class="mobile-group">
+    <div class="mobile-search">
+      <svg fill="none" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="16.5" y1="16.5" x2="22" y2="22"></line>
+      </svg>
+      <input type="text" placeholder="Search..." />
+    </div>
+  </div>
+
+  <!-- LINKS -->
+  <a href="/">Home</a>
+  <a href="/profiles/new">Create Profile</a>
+  <a href="/questions/new">Ask a Question</a>
+  <a href="#contact">Contact Us</a>
+
+  <% if (!currentUser) { %>
+    <a href="/login">Login</a>
+    <a href="/signup">Signup</a>
+  <% } else { %>
+    <a href="/logout">Logout</a>
+  <% } %>
+
+  <!-- MOBILE THEME BUTTON -->
+  <button class="theme-toggle" onclick="toggleTheme()" style="margin-top:20px;">
+    <svg id="themeIconMobile" fill="none" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="5"></circle>
+    </svg>
+  </button>
+
+</div>
+
+<script>
+function openMenu() {
+  document.getElementById("sidePanel").style.right = "0";
+}
+function closeMenu() {
+  document.getElementById("sidePanel").style.right = "-300px";
+}
+document.addEventListener("click", e => {
+  const panel = document.getElementById("sidePanel");
+  const menuBtn = document.querySelector(".menu-btn");
+
+  if (!panel.contains(e.target) && !menuBtn.contains(e.target)) {
+    closeMenu();
+  }
+});
+
+/* THEME TOGGLE */
+function toggleTheme() {
+  const current = document.body.getAttribute("data-theme");
+  const newTheme = current === "dark" ? "light" : "dark";
+  document.body.setAttribute("data-theme", newTheme);
+
+  const sunMoon = newTheme === "dark"
+    ? `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`
+    : `<circle cx="12" cy="12" r="5"></circle>`;
+
+  document.getElementById("themeIcon").innerHTML = sunMoon;
+  document.getElementById("themeIconMobile").innerHTML = sunMoon;
+}
+
+//search box
+
+function attachSearch(inputId, clearId, resultsId, innerId) {
+  const searchInput = document.getElementById(inputId);
+  const resultsPanel = document.getElementById(resultsId);
+  const resultsInner = document.getElementById(innerId);
+  const clearBtn = document.getElementById(clearId);
+
+  let fuse = null;
+  let indexData = [];
+
+  function debounce(fn, wait = 220) {
+    let t;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), wait);
+    };
+  }
+
+  async function loadIndex() {
+    if (indexData.length) return;
+    const res = await fetch('/api/search-index');
+    const json = await res.json();
+    indexData = json.index;
+
+    fuse = new Fuse(indexData, {
+      includeScore: true,
+      shouldSort: true,
+      threshold: 0.4,
+      keys: ["name", "username", "branch", "title", "body", "tags"]
+    });
+  }
+
+  function renderResults(res) {
+    resultsInner.innerHTML = "";
+    if (!res.length) {
+      resultsInner.innerHTML = `<div style="padding:12px;">No results</div>`;
+      return;
+    }
+
+    res.forEach(r => {
+      const item = r.item;
+      const link = document.createElement("a");
+      link.href = item.url;
+      link.style.display = "block";
+      link.style.padding = "10px 12px";
+      link.style.textDecoration = "none";
+      link.style.color = "var(--text)";
+      link.innerHTML = item.name || item.title;
+      resultsInner.appendChild(link);
+    });
+  }
+
+  const doSearch = debounce(async (q) => {
+    q = q.trim();
+    if (!q) {
+      resultsPanel.style.display = "none";
+      clearBtn.style.display = "none";
+      return;
+    }
+
+    clearBtn.style.display = "inline";
+
+    await loadIndex();
+    const res = fuse.search(q);
+    renderResults(res);
+    resultsPanel.style.display = "block";
+  });
+
+  searchInput.addEventListener("input", e => doSearch(e.target.value));
+  clearBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    resultsPanel.style.display = "none";
+    clearBtn.style.display = "none";
+  });
+}
+
+attachSearch("searchInput", "clearSearch", "searchResults", "searchResultsInner");
+attachSearch("searchInputMobile", "clearSearchMobile", "searchResultsMobile", "searchResultsInnerMobile");
+</script>

@@ -1,0 +1,177 @@
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; 
+}
+
+.container {
+    flex: 1;
+}
+
+/* navbar */
+.navbar {
+    height: 5rem;
+    background-color: white !important;
+}
+
+.fa-globe {
+    font-size: 2.5rem;
+}
+
+.nav-link {
+    color: #222222 !important;
+}
+
+/* Footer */
+
+.f-info-links a {
+    text-decoration: none !important;
+    color: #222222;
+}
+
+.f-info-links a:hover {
+    text-decoration: underline !important;
+}
+
+.f-info-links, .f-info-socials {
+    width: 100%;
+}
+
+.f-info-socials i {
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.f-info {
+    text-align: center;
+    height: 8rem;
+    background-color: #ebebeb;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: space-evenly;
+}
+
+/* card */
+
+.card {
+    border: none !important;
+    margin-bottom: 2rem;
+}
+
+.card-img-top {
+    border-radius: 1rem;
+    width: 100% !important;
+    object-fit: cover !important;
+}
+
+.card-body {
+    padding: 0 !important;
+}
+
+.card-text p {
+    font-weight: 400;
+}
+
+.profiles-link {
+    text-decoration: none !important;
+}
+
+/* card Effect */
+.card-img-overlay {
+    opacity: 0;
+}
+
+.card-img-overlay:hover {
+    opacity: 0.2;
+    background-color: white;
+}
+
+/* New page  */
+/* .add-btn {
+    background-color: aquamarine !important;
+    border: none !important;
+}
+
+/* edit page  
+.edit-btn {
+    background-color: rgb(199, 80, 16) !important;
+    border: none !important; 
+}
+
+/* show page  */
+.show-img {
+    height: 30vh;
+}
+
+.btns {
+    display: flex !important;
+}
+
+.show-card {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.ql-editor img {
+    max-width: 200px !important;
+    max-height: 200px !important;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.thumb-wrapper {
+    width: 90px;
+    height: 90px;
+    margin-right: 8px;
+    text-align: center;
+    display: inline-block;
+}
+
+.thumb-image {
+    width: 90px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.thumb-label {
+    font-size: 11px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+/* Main Landing page UI  */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+/* Use flex layout to push footer down */
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+/* The content area will grow, footer stays at bottom */
+.main-content {
+    flex: 1;
+}
+
+/* Footer styling */
+.footer {
+    background: #1B3C53;
+    color: white;
+    padding: 40px 0;
+    margin-top: auto; /* THIS makes it stick to bottom */
+}
+
+.footer a {
+    color: #ddd;
+    text-decoration: none;
+}
+
+::placeholder { color: var(--placeholder) !important; }

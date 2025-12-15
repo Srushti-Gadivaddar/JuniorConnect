@@ -1,0 +1,781 @@
+<!-- <% layout("/layouts/boilerplate") %>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+
+
+:root {
+  --chat-bg: #f5f7fa;
+  --bubble-left: #ffffff;
+  --bubble-right: #d1e7ff;
+  --bubble-shadow: rgba(0,0,0,0.15);
+  --header-bg: #ffffff;
+  --input-bg: #ffffff;
+}
+
+[data-theme="dark"] {
+  --chat-bg: #0f172a;
+  --bubble-left: #1e293b;
+  --bubble-right: #334155;
+  --header-bg: #1e293b;
+  --input-bg: #1e293b;
+  --bubble-shadow: rgba(255,255,255,0.05);
+}
+
+
+/* Chat container */
+#chatBox { 
+  height: 70vh;
+  overflow-y: auto;
+  background: var(--chat-bg);
+  padding: 18px;
+  border-radius: 15px;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+  scroll-behavior: smooth;
+}
+
+
+#chatBox::-webkit-scrollbar {
+  width: 6px;
+}
+#chatBox::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+
+.message { 
+  padding: 10px 16px; 
+  border-radius: 20px; 
+  max-width: 72%; 
+  margin-bottom: 14px; 
+  word-wrap: break-word; 
+  position: relative;
+  animation: fadeIn 0.15s ease;
+  box-shadow: 0 3px 12px var(--bubble-shadow);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.message-left { 
+  background: var(--bubble-left);
+  color: #111;
+  border-radius: 20px 20px 20px 5px;
+}
+
+.message-right { 
+  background: var(--bubble-right);
+  color: #000; 
+  border-radius: 20px 20px 5px 20px; 
+  margin-left:auto;
+  cursor:pointer;
+}
+
+
+.message img { 
+  max-width: 210px; 
+  border-radius: 12px; 
+  margin-top: 7px; 
+  cursor:pointer; 
+  transition: 0.2s ease;
+}
+
+.message img:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+
+.msg-options { 
+  display:none; 
+  position:absolute; 
+  top:-5px; 
+  right:-120px; 
+  background:#fff; 
+  border:1px solid #ccc; 
+  border-radius:10px; 
+  box-shadow:0 2px 8px rgba(0,0,0,0.2); 
+  padding:5px; 
+  z-index:999;
+}
+.msg-options button { 
+  width:100%; 
+  background:none; 
+  border:none; 
+  padding:6px; 
+  text-align:left; 
+  cursor:pointer;
+  color:red;
+}
+
+
+.chat-header {
+  background: var(--header-bg);
+  padding: 12px 10px;
+  border-radius: 15px;
+  display:flex;
+  align-items:center;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+
+
+#inputArea { 
+  position:sticky; 
+  bottom:0; 
+  display:flex; 
+  gap:10px; 
+  align-items:center; 
+  padding:12px; 
+  background: var(--input-bg);
+  border-radius:0 0 15px 15px;
+  box-shadow: 0 -3px 12px rgba(0,0,0,0.05);
+}
+
+#messageInput {
+  border-radius: 25px;
+  padding: 12px 18px;
+  background: var(--bubble-left);
+  border:1px solid #cbd5e1;
+}
+
+#messageInput:focus {
+  border-color:#3b82f6;
+  box-shadow:0 0 0 3px rgba(59,130,246,0.2);
+}
+
+
+.btn-primary {
+  border-radius: 50%;
+  width:48px;
+  height:48px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:20px;
+  padding:0;
+}
+
+.btn-primary:hover {
+  transform: scale(1.07);
+}
+</style>
+
+
+
+
+
+<div class="container mt-3" style="max-width:600px;">
+
+  <div class="chat-header mb-3">
+    <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" 
+      style="width:45px; height:45px; font-size:20px;">
+      <%= user.username.charAt(0).toUpperCase() %>
+    </div>
+    <h5 class="m-0 fw-semibold"><%= user.username %></h5>
+  </div>
+
+
+
+  <div id="chatBox">
+    <% messages.forEach(m => { %>
+      <div 
+        class="message <%= m.sender._id.equals(currentUser._id) ? 'message-right' : 'message-left' %>"
+        data-id="<%= m._id %>"
+      >
+        
+        <% if(m.content){ %>
+          <div><%= m.content %></div>
+        <% } %>
+
+        <% if(!m.isRead && !m.sender._id.equals(currentUser._id)){ %>
+          <small class="text-warning">Unread</small>
+        <% } %>
+
+        <% m.attachments.forEach((att, idx) => { %>
+          <div class="attachment-wrapper mt-1">
+
+            <% if(att.type === "image"){ %>
+              <img src="<%= att.url %>" onclick="openLightbox('<%= att.url %>')">
+              <a href="<%= att.url %>" download class="d-block small mt-1 text-primary">Download Image</a>
+
+            <% } else { %>
+              <a href="<%= att.url %>" download class="d-block small mt-1">
+                📄 <%= att.url.split("/").pop() %>
+              </a>
+            <% } %>
+
+            <% if(m.sender._id.equals(currentUser._id)) { %>
+              <button 
+                class="delete-attachment-btn text-danger small"
+                data-msgid="<%= m._id %>"
+                data-index="<%= idx %>"
+                style="border:none;background:none;cursor:pointer;">
+                Delete Attachment
+              </button>
+            <% } %>
+
+          </div>
+        <% }) %>
+
+        <% if(m.sender._id.equals(currentUser._id)) { %>
+          <div class="msg-options">
+            <button class="btn-delete-msg" data-id="<%= m._id %>">Delete Message</button>
+
+            <div class="mt-2">
+            <% if(user.blockedUsers.includes(currentUser._id)){ %>
+              <button class="btn btn-sm btn-danger" onclick="unblockUser('<%= user._id %>')">Unblock</button>
+            <% } else { %>
+              <button class="btn btn-sm btn-warning" onclick="blockUser('<%= user._id %>')">Block</button>
+            <% } %>
+          </div>
+        </div>
+        <% } %>
+
+      </div>
+    <% }) %>
+  </div>
+
+
+
+  <div id="inputArea">
+    <form id="messageForm" enctype="multipart/form-data" 
+      style="flex:1; display:flex; gap:10px; align-items:center;">
+      
+      <input id="messageInput" name="content" type="text" 
+      placeholder="Type a message…" class="form-control">
+
+      <input type="file" name="attachments" id="fileInput" multiple hidden />
+
+      <label for="fileInput" style="cursor:pointer;">
+        📎
+      </label>
+
+      <button class="btn btn-primary" type="submit">➤</button>
+    </form>
+  </div>
+
+</div>
+
+
+<div id="lightboxOverlay" onclick="closeLightbox()" 
+     style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);justify-content:center;align-items:center;z-index:9999;">
+  <img id="lightboxImage" style="max-width:90%;max-height:90%;border-radius:10px;">
+</div>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+const chatBox = document.getElementById("chatBox");
+
+const senderId = "<%= currentUser._id %>";
+const receiverId = "<%= user._id %>";
+
+socket.emit("joinRoom", { sender: senderId, receiver: receiverId });
+
+
+chatBox.addEventListener("dblclick", e => {
+  const msgEl = e.target.closest(".message-right");
+  if (!msgEl) return;
+  const menu = msgEl.querySelector(".msg-options");
+  if (menu) menu.style.display = menu.style.display === "block" ? "none" : "block";
+});
+
+
+chatBox.addEventListener("click", async e => {
+  if(e.target.classList.contains("btn-delete-msg")){
+    const msgId = e.target.dataset.id;
+    const res = await fetch(`/messages/delete/${msgId}`, { method:"DELETE" });
+    if(res.ok){
+      document.querySelector(`.message[data-id='${msgId}']`).remove();
+      socket.emit("deleteMessage", { msgId });
+    }
+  }
+});
+
+
+chatBox.addEventListener("click", async e => {
+  if(e.target.classList.contains("delete-attachment-btn")){
+    const msgId = e.target.dataset.msgid;
+    const index = e.target.dataset.index;
+    const res = await fetch(`/messages/delete-attachment/${msgId}/${index}`, { method:"DELETE" });
+    if(res.ok){
+      e.target.parentElement.remove();
+      socket.emit("deleteAttachment", { msgId, index });
+    }
+  }
+});
+
+
+socket.on("messageDeleted", ({ msgId }) => {
+  document.querySelector(`.message[data-id='${msgId}']`)?.remove();
+});
+socket.on("attachmentDeleted", ({ msgId, index }) => {
+  const msg = document.querySelector(`.message[data-id='${msgId}']`);
+  msg?.querySelectorAll(".attachment-wrapper")[index]?.remove();
+});
+
+
+document.getElementById("messageForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const res = await fetch(`/messages/chat/${receiverId}`, { method:"POST", body:fd });
+  if(res.ok){
+    e.target.reset();
+  }
+});
+
+
+function openLightbox(url){
+  document.getElementById("lightboxImage").src = url;
+  document.getElementById("lightboxOverlay").style.display = "flex";
+}
+function closeLightbox(){
+  document.getElementById("lightboxOverlay").style.display = "none";
+}
+
+
+socket.on("receiveMessage", (msg) => {
+  const isMine = msg.sender._id === senderId;
+
+  const msgDiv = document.createElement("div");
+  msgDiv.classList.add("message", isMine ? "message-right" : "message-left");
+  msgDiv.dataset.id = msg._id;
+
+  let html = "";
+  if (msg.content) html += `<div>${msg.content}</div>`;
+
+  if (msg.attachments?.length) {
+    msg.attachments.forEach(att => {
+      if(att.type === "image") {
+        html += `
+          <div class="attachment-wrapper mt-1">
+            <img src="${att.url}" onclick="openLightbox('${att.url}')">
+            <a href="${att.url}" download class="small d-block">Download Image</a>
+          </div>
+        `;
+      } else {
+        html += `<a href="${att.url}" download>📄 ${att.url.split("/").pop()}</a>`;
+      }
+    });
+  }
+
+  msgDiv.innerHTML = html;
+  chatBox.appendChild(msgDiv);
+
+  chatBox.scrollTop = chatBox.scrollHeight;
+});
+</script> -->
+
+
+<% layout("/layouts/boilerplate") %>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+:root {
+  --chat-bg: #f5f7fa;
+  --bubble-left: #ffffff;
+  --bubble-right: #d1e7ff;
+  --bubble-shadow: rgba(0,0,0,0.15);
+  --header-bg: #ffffff;
+  --input-bg: #ffffff;
+  --text-color: #111;
+}
+
+[data-theme="dark"] {
+  --chat-bg: #0f172a;
+  --bubble-left: #1e293b;
+  --bubble-right: #334155;
+  --header-bg: #1e293b;
+  --input-bg: #1e293b;
+  --bubble-shadow: rgba(255,255,255,0.05);
+  --text-color: #e0e7ff;
+}
+
+/* Chat container */
+#chatBox {
+  height: 70vh;
+  overflow-y: auto;
+  background: var(--chat-bg);
+  padding: 18px;
+  border-radius: 15px;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar */
+#chatBox::-webkit-scrollbar { width: 6px; }
+#chatBox::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+/* Messages */
+.message {
+  padding: 12px 18px;
+  border-radius: 20px;
+  max-width: 90%;
+  margin-bottom: 14px;
+  word-wrap: break-word;
+  position: relative;
+  animation: fadeIn 0.15s ease;
+  box-shadow: 0 3px 12px var(--bubble-shadow);
+  transition: all 0.2s;
+  color: var(--text-color);
+}
+
+/* Hover effect for three-dot menu */
+.message:hover .msg-options-btn {
+  display: flex;
+}
+
+/* Left/Right messages */
+.message-left {
+  background: var(--bubble-left);
+  border-radius: 20px 20px 20px 5px;
+}
+.message-right {
+  background: var(--bubble-right);
+  border-radius: 20px 20px 5px 20px;
+  margin-left: auto;
+}
+
+/* Three-dot button */
+.msg-options-btn {
+  display: none;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 18px;
+  user-select: none;
+}
+
+/* Options menu with image slider */
+.msg-options {
+  display: none;
+  position: absolute;
+  top: 25px;
+  right: 0;
+  background: var(--bubble-left);
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  padding: 5px;
+  min-width: 180px;
+  max-width: 250px;
+  z-index: 999;
+}
+
+.msg-options .slider {
+  display: flex;
+  overflow-x: auto;
+  gap: 5px;
+  padding-bottom: 5px;
+  scroll-behavior: smooth;
+}
+.msg-options .slider img {
+  max-width: 60px;
+  max-height: 60px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.msg-options .slider img:hover {
+  transform: scale(1.1);
+}
+
+.msg-options a, .msg-options button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: #3b82f6;
+  font-weight: 500;
+  text-decoration: none;
+}
+.msg-options button { color: red; }
+
+/* Images in chat */
+.message img {
+  max-width: 250px;
+  border-radius: 12px;
+  margin-top: 7px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.message img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+/* Chat header */
+.chat-header {
+  background: var(--header-bg);
+  padding: 12px 10px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+  margin-bottom: 10px;
+}
+
+/* Input area */
+#inputArea {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  background: var(--input-bg);
+  border-radius: 0 0 15px 15px;
+  box-shadow: 0 -3px 12px rgba(0,0,0,0.05);
+}
+
+#messageInput {
+  border-radius: 25px;
+  padding: 12px 18px;
+  flex: 1;
+  background: var(--bubble-left);
+  border:1px solid #cbd5e1;
+}
+#messageInput:focus {
+  border-color:#3b82f6;
+  box-shadow:0 0 0 3px rgba(59,130,246,0.2);
+}
+
+.btn-primary {
+  border-radius: 50%;
+  width:48px;
+  height:48px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:20px;
+  padding:0;
+  transition: transform 0.2s;
+}
+.btn-primary:hover { transform: scale(1.07); }
+
+/* Lightbox */
+#lightboxOverlay {
+  display:none;
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.85);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+#lightboxImage {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+}
+
+/* Responsive adjustments */
+@media (min-width: 992px) {
+  .container { max-width: 900px; }
+  .message { max-width: 70%; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<div class="container mt-3">
+  <!-- Header -->
+  <div class="chat-header mb-3">
+    <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width:45px; height:45px; font-size:20px;">
+      <%= user.username.charAt(0).toUpperCase() %>
+    </div>
+    <h5 class="m-0 fw-semibold"><%= user.username %></h5>
+  </div>
+
+  <!-- Chat box -->
+  <div id="chatBox">
+    <% messages.forEach(m => { %>
+      <div class="message <%= m.sender._id.equals(currentUser._id) ? 'message-right' : 'message-left' %>" data-id="<%= m._id %>">
+        <span class="msg-options-btn">⋯</span>
+
+        <% if(m.content){ %> 
+          <div><%= m.content %></div> 
+        <% } %>
+
+        <% if(!m.isRead && !m.sender._id.equals(currentUser._id)){ %> 
+          <small class="text-warning">Unread</small> 
+        <% } %>
+
+        <% if(m.attachments.length){ %>
+          <div class="attachment-wrapper mt-1">
+            <% m.attachments.forEach((att, idx) => { %>
+              <% if(att.type === "image"){ %>
+                <img src="<%= att.url %>" onclick="openLightbox('<%= att.url %>')">
+              <% } else { %>
+                <span>📄 <%= att.url.split("/").pop() %></span>
+              <% } %>
+            <% }) %>
+          </div>
+        <% } %>
+
+        <!-- Three-dot menu -->
+        <div class="msg-options">
+          <% if(m.attachments.length){ %>
+            <div class="slider">
+              <% m.attachments.forEach(att => { %>
+                <% if(att.type==="image"){ %>
+                  <img src="<%= att.url %>" onclick="openLightbox('<%= att.url %>')">
+                <% } %>
+              <% }) %>
+            </div>
+            <% m.attachments.forEach(att => { %>
+              <a href="<%= att.url %>" download>Download <%= att.type === 'image' ? 'Image' : 'File' %></a>
+            <% }) %>
+          <% } %>
+
+          <% if(m.sender._id.equals(currentUser._id)) { %>
+            <button class="btn-delete-msg" data-id="<%= m._id %>">Delete Message</button>
+          <% } %>
+
+          <div class="mt-2">
+            <% if(user.blockedUsers.includes(currentUser._id)){ %>
+              <button class="btn btn-sm btn-danger" onclick="unblockUser('<%= user._id %>')">Unblock</button>
+            <% } else { %>
+              <button class="btn btn-sm btn-warning" onclick="blockUser('<%= user._id %>')">Block</button>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <!-- Input area -->
+  <div id="inputArea">
+    <form id="messageForm" enctype="multipart/form-data" style="flex:1; display:flex; gap:10px; align-items:center;">
+      <input id="messageInput" name="content" type="text" placeholder="Type a message…" class="form-control">
+      <input type="file" name="attachments" id="fileInput" multiple hidden />
+      <label for="fileInput" style="cursor:pointer;">📎</label>
+      <button class="btn btn-primary" type="submit">➤</button>
+    </form>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div id="lightboxOverlay" onclick="closeLightbox()">
+  <img id="lightboxImage">
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+const chatBox = document.getElementById("chatBox");
+const senderId = "<%= currentUser._id %>";
+const receiverId = "<%= user._id %>";
+
+// Join room
+socket.emit("joinRoom", { sender: senderId, receiver: receiverId });
+
+// Toggle menu and handle deletes
+chatBox.addEventListener("click", e => {
+  if(e.target.classList.contains("msg-options-btn")){
+    const menu = e.target.parentElement.querySelector(".msg-options");
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    autoSlide(menu.querySelector('.slider'));
+  }
+
+  if(e.target.classList.contains("btn-delete-msg")){
+    const msgId = e.target.dataset.id;
+    fetch(`/messages/delete/${msgId}`, { method:"DELETE" }).then(res => {
+      if(res.ok){
+        document.querySelector(`.message[data-id='${msgId}']`)?.remove();
+        socket.emit("deleteMessage", { msgId });
+      }
+    });
+  }
+});
+
+// Auto-slide function
+function autoSlide(slider){
+  if(!slider) return;
+  let scrollAmount = 0;
+  const maxScroll = slider.scrollWidth - slider.clientWidth;
+  const interval = setInterval(() => {
+    if(scrollAmount >= maxScroll){
+      clearInterval(interval);
+    } else {
+      scrollAmount += 1; // pixels per step
+      slider.scrollLeft = scrollAmount;
+    }
+  }, 15);
+}
+
+// Form submit
+document.getElementById("messageForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const res = await fetch(`/messages/chat/${receiverId}`, { method:"POST", body:fd });
+  if(res.ok){ e.target.reset(); }
+});
+
+// Lightbox
+function openLightbox(url){
+  document.getElementById("lightboxImage").src = url;
+  document.getElementById("lightboxOverlay").style.display = "flex";
+}
+function closeLightbox(){
+  document.getElementById("lightboxOverlay").style.display = "none";
+}
+
+// Receive message
+socket.on("receiveMessage", (msg) => {
+  const isMine = msg.sender._id === senderId;
+  const msgDiv = document.createElement("div");
+  msgDiv.classList.add("message", isMine ? "message-right" : "message-left");
+  msgDiv.dataset.id = msg._id;
+
+  let html = '<span class="msg-options-btn">⋯</span>';
+  if(msg.content) html += `<div>${msg.content}</div>`;
+  if(msg.attachments?.length){
+    html += '<div class="attachment-wrapper mt-1">';
+    msg.attachments.forEach(att => {
+      if(att.type==="image"){
+        html += `<img src="${att.url}" onclick="openLightbox('${att.url}')">`;
+      } else {
+        html += `<span>📄 ${att.url.split("/").pop()}</span>`;
+      }
+    });
+    html += '</div>';
+  }
+
+  // Options menu with slider
+  html += '<div class="msg-options">';
+  if(msg.attachments?.length){
+    html += '<div class="slider">';
+    msg.attachments.forEach(att => {
+      if(att.type==="image"){
+        html += `<img src="${att.url}" onclick="openLightbox('${att.url}')">`;
+      }
+    });
+    html += '</div>';
+    msg.attachments.forEach(att => {
+      html += `<a href="${att.url}" download>Download ${att.type==='image'?'Image':'File'}</a>`;
+    });
+  }
+  if(isMine) html += `<button class="btn-delete-msg" data-id="${msg._id}">Delete Message</button>`;
+  html += '</div>';
+
+  msgDiv.innerHTML = html;
+  chatBox.appendChild(msgDiv);
+  chatBox.scrollTop = chatBox.scrollHeight;
+});
+</script>
+
+

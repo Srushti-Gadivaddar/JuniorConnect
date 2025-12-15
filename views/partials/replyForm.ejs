@@ -1,0 +1,14 @@
+<% if (!currentUser) { %>
+  <p><a href="/login">Log in</a> to reply.</p>
+<% } else { %>
+  <form action="/questions/<%= question._id %>/answers/<%= a._id %>/replies" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+      <textarea name="text" rows="2" class="form-control" placeholder="Write a reply..." required></textarea>
+    </div>
+    <div class="form-group">
+      <input type="file" name="images" multiple />
+      <input type="file" name="files" multiple />
+    </div>
+    <button class="btn btn-sm btn-primary mt-1">Reply</button>
+  </form>
+<% } %>

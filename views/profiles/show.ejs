@@ -1,0 +1,379 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+
+:root {
+    --bg: #f5f7fb;
+    --text: #0b2347;
+    --card: #ffffff;
+    --btn: #2f5589;
+    --btn-text: #ffffff;
+    --accent: #1B3C53;
+}
+
+[data-theme="dark"] {
+    --bg: #0f172a;
+    --text: #e2e8f0;
+    --card: #1e293b;
+    --btn: #334155;
+    --btn-text: #e2e8f0;
+    --accent: #2b4d63;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+}
+
+.profile-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    background: var(--card);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+    align-items: flex-start;
+}
+
+.profile-info img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 15px;
+}
+
+.profile-details {
+    flex: 1;
+}
+
+.profile-details h2 {
+    margin: 0 0 10px 0;
+}
+
+.profile-details p {
+    margin: 4px 0;
+    color: #4a5568;
+    font-size: 0.95rem;
+}
+
+.btn-primary, .btn-dark {
+    border-radius: 8px;
+    padding: 8px 16px;
+    transition: 0.2s;
+}
+
+.btn-primary:hover, .btn-dark:hover {
+    transform: translateY(-2px);
+}
+
+
+.post-card {
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+
+.post-card .card-header img {
+    object-fit: cover;
+}
+
+
+.post-images-grid {
+    margin-top: 10px;
+    gap: 4px;
+}
+
+.post-images-grid img {
+    cursor: pointer;
+}
+
+.comments-box {
+    padding: 10px 0;
+}
+
+.comments-box div {
+    background: #f1f5f9;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+}
+
+.comments-box p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.comments-box small {
+    display: block;
+    color: #718096;
+}
+
+@media (max-width: 992px) {
+    .profile-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .profile-info img {
+        width: 100%;
+        max-width: 200px;
+        height: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .btn-primary, .btn-dark {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-info {
+        padding: 15px;
+    }
+
+    .profile-details h2 {
+        font-size: 1.2rem;
+    }
+
+    .profile-details p {
+        font-size: 0.85rem;
+    }
+}
+</style>
+
+<div class="container mt-4">
+
+    <div class="profile-info">
+        <img src="<%= profile.profile_pic.url %>" alt="Profile Picture">
+        <div class="profile-details">
+            <h2><%= profile.name %></h2>
+            <p><strong>Role:</strong> <%= profile.role %></p>
+            <p><strong>Branch:</strong> <%= profile.branch %></p>
+            <p><strong>Batch:</strong> <%= profile.batch %></p>
+            <p><strong>Bio:</strong> <%= profile.bio || "No bio yet" %></p>
+            <a href="/messages/chat/<%= profile.user._id %>" class="btn btn-primary mt-2">Message</a>
+        </div>
+    </div>
+
+    <% if (currentUser && String(currentUser._id) === String(profile.user._id)) { %>
+        <div class="d-flex gap-2 mb-4">
+            <a href="/profiles/<%= profile._id %>/edit" class="btn ">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                  <path d="M15.502 1.94a.5.5 0 0 1 0 .706l-1.647 1.646-2.12-2.121L13.38.525a.5.5 0 0 1 .707 0l1.415 1.415z"/>
+                                  <path fill-rule="evenodd" d="M1 13.5V16h2.5l9.356-9.356-2.121-2.121L1 13.5z"/>
+                                </svg>
+            </a>
+            <form method="POST" action="/profiles/<%= profile._id %>/?_method=DELETE">
+                <button class="btn ">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                      <path d="M5.5 5.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-4a.5.5 0 0 1-.5-.5v-7z"/>
+                                      <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9.5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 13.5V4h-.5a1 1 0 0 1 0-2h3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1h3a1 1 0 0 1 1 1z"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+        <div class="mb-4">
+            <button id="showCreatePostBtn" class="btn btn-dark d-flex align-items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M10.5 3a.5.5 0 0 1 .5.5V5h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-8a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h1V3.5a.5.5 0 0 1 .5-.5h6zM8 6a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                  <path d="M8 7.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/>
+                </svg>
+                Create Post
+            </button>
+        </div>
+
+        <div class="card mb-4 p-3" id="createPostCard" style="display: none;">
+            <h4>Create a Post</h4>
+            <form action="/profiles/<%= profile._id %>/posts" method="POST" enctype="multipart/form-data" novalidate>
+                <div class="mb-2">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" id="title" name="post[title]" class="form-control" placeholder="Enter post title" required>
+                </div>
+                <div class="mb-2">
+                    <label for="content" class="form-label">Content</label>
+                    <textarea id="content" name="post[content]" class="form-control" rows="4" required></textarea>
+                </div>
+                <div class="mb-2 d-flex align-items-center gap-2">
+                    <label for="postImages" style="cursor:pointer;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M10.5 3a.5.5 0 0 1 .5.5V5h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-8a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h1V3.5a.5.5 0 0 1 .5-.5h6zM8 6a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                          <path d="M8 7.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/>
+                        </svg>
+                    </label>
+                    <input type="file" id="postImages" name="postImages" class="form-control" multiple hidden>
+                    <div id="createPostPreview" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+                </div>
+                <button class="btn btn-dark w-100">Add Post</button>
+            </form>
+        </div>
+    <% } %>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <% posts.forEach(post => { %>
+        <div class="col">
+            <div class="post-card card">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <img src="<%= profile.profile_pic.url %>" class="rounded-circle" width="40" height="40">
+                    <strong><%= profile.name %></strong>
+                </div>
+
+                <% if(post.images && post.images.length > 0){ %>
+                  <div class="post-images-grid p-2">
+                    <% const imgs = post.images.slice(0, 4); %>
+
+                    <% if(imgs.length === 1){ %>
+                      <img src="<%= imgs[0].url %>" class="img-fluid rounded w-100" data-bs-toggle="modal" data-bs-target="#carouselModal-<%= post._id %>">
+                    <% } else if(imgs.length === 2){ %>
+                      <div class="row g-1">
+                        <% imgs.forEach(img => { %>
+                          <div class="col-6">
+                            <img src="<%= img.url %>" class="img-fluid rounded w-100" data-bs-toggle="modal" data-bs-target="#carouselModal-<%= post._id %>">
+                          </div>
+                        <% }) %>
+                      </div>
+                    <% } else if(imgs.length === 3){ %>
+                      <div class="row g-1">
+                        <div class="col-6">
+                          <img src="<%= imgs[0].url %>" class="img-fluid rounded w-100 h-100" style="object-fit: cover;" data-bs-toggle="modal" data-bs-target="#carouselModal-<%= post._id %>">
+                        </div>
+                        <div class="col-6 d-flex flex-column gap-1">
+                          <img src="<%= imgs[1].url %>" class="img-fluid rounded w-100" style="flex:1;" data-bs-toggle="modal" data-bs-target="#carouselModal-<%= post._id %>">
+                          <img src="<%= imgs[2].url %>" class="img-fluid rounded w-100" style="flex:1;" data-bs-toggle="modal" data-bs-target="#carouselModal-<%= post._id %>">
+                        </div>
+                      </div>
+                    <% } else { %>
+                      <div class="row g-1">
+                        <% imgs.forEach(img => { %>
+                          <div class="col-6 mb-1">
+                            <img src="<%= img.url %>" class="img-fluid rounded w-100" data-bs-toggle="modal" data-bs-target="#carouselModal-<%= post._id %>">
+                          </div>
+                        <% }) %>
+                      </div>
+                    <% } %>
+                  </div>
+
+                  <div class="modal fade" id="carouselModal-<%= post._id %>" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                      <div class="modal-content position-relative">
+                        <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <div class="modal-body p-0">
+                          <div id="carousel-<%= post._id %>" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                              <% post.images.forEach((img, index) => { %>
+                                <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                  <img src="<%= img.url %>" class="d-block w-100" style="object-fit: contain; max-height:80vh;">
+                                </div>
+                              <% }) %>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carousel-<%= post._id %>" data-bs-slide="prev">
+                              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                              <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carousel-<%= post._id %>" data-bs-slide="next">
+                              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                              <span class="visually-hidden">Next</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                <% } %>
+
+                <div class="card-body">
+                    <h5 class="card-title"><%= post.title %></h5>
+                    <p class="card-text"><%= post.content %></p>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <form action="/profiles/<%= profile._id %>/posts/<%= post._id %>/like" method="POST">
+                            <button class="btn btn-outline-danger btn-sm"><strong><%= post.likes.length %></strong> ❤️</button>
+                        </form>
+                        <small class="text-muted"><%= new Date(post.createdAt).toLocaleString() %></small>
+                        <% if (currentUserProfile && post.author.equals(currentUserProfile._id)) { %>
+                        <div class="d-flex gap-1">
+                            <a href="/profiles/<%= profile._id %>/posts/<%= post._id %>/edit" class="btn  btn-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                  <path d="M15.502 1.94a.5.5 0 0 1 0 .706l-1.647 1.646-2.12-2.121L13.38.525a.5.5 0 0 1 .707 0l1.415 1.415z"/>
+                                  <path fill-rule="evenodd" d="M1 13.5V16h2.5l9.356-9.356-2.121-2.121L1 13.5z"/>
+                                </svg>
+                            </a>
+                            <form action="/profiles/<%= profile._id %>/posts/<%= post._id %>?_method=DELETE" method="POST">
+                                <button class="btn  btn-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                      <path d="M5.5 5.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-4a.5.5 0 0 1-.5-.5v-7z"/>
+                                      <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9.5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 13.5V4h-.5a1 1 0 0 1 0-2h3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1h3a1 1 0 0 1 1 1z"/>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                        <% } %>
+                    </div>
+
+                    <button class="btn btn-sm btn-outline-secondary mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#comments-<%= post._id %>">
+                        💬 Comments (<%= post.comments.length %>)
+                    </button>
+
+                    <div class="collapse" id="comments-<%= post._id %>">
+                        <div class="comments-box">
+                            <% if (post.comments.length > 0) { %>
+                                <% post.comments.forEach(comment => { %>
+                                    <div class="border rounded p-2 mb-2 bg-light">
+                                        <strong>@<%= comment.author ? comment.author.name : "Unknown" %></strong>:
+                                        <p class="mb-1"><%= comment.comment %></p>
+                                        <small class="text-muted"><%= new Date(comment.createdAt).toLocaleString() %></small>
+                                    </div>
+                                <% }) %>
+                            <% } else { %>
+                                <p class="text-muted">No comments yet.</p>
+                            <% } %>
+
+                            <% if(currentUser) { %>
+                            <form action="/profiles/<%= profile._id %>/posts/<%= post._id %>/comments" method="POST" class="d-flex mt-2 gap-1">
+                                <input type="text" name="comment[comment]" class="form-control form-control-sm" placeholder="Add a comment..." required>
+                                <button class="btn btn-primary btn-sm">Post</button>
+                            </form>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% }) %>
+    </div>
+</div>
+
+        <script>
+    const showBtn = document.getElementById('showCreatePostBtn');
+    const createCard = document.getElementById('createPostCard');
+    showBtn.addEventListener('click', () => {
+        createCard.style.display = createCard.style.display === 'none' ? 'block' : 'none';
+    });
+
+    const postInput = document.getElementById('postImages');
+    const postPreview = document.getElementById('createPostPreview');
+    postInput.addEventListener('change', function(){
+        postPreview.innerHTML = '';
+        Array.from(this.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = '80px';
+                img.style.height = '80px';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '8px';
+                postPreview.appendChild(img);
+            }
+            reader.readAsDataURL(file);
+        });
+    });
+</script>

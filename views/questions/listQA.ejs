@@ -1,0 +1,166 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+:root {
+  --chat-bg: #f5f7fa;
+  --bubble-left: #ffffff;
+  --bubble-right: #d1e7ff;
+  --bubble-shadow: rgba(0,0,0,0.15);
+  --header-bg: #ffffff;
+  --input-bg: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+}
+
+[data-theme="dark"] {
+  --chat-bg: #0f172a;
+  --bubble-left: #1e293b;
+  --bubble-right: #334155;
+  --bubble-shadow: rgba(255,255,255,0.05);
+  --header-bg: #1e293b;
+  --input-bg: #1e293b;
+  --text-primary: #e2e8f0;
+  --text-secondary: #cbd5e1;
+}
+
+body {
+  background-color: var(--chat-bg);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.btn-primary {
+  background-color: var(--bubble-right);
+  color: var(--text-primary);
+  border: none;
+  font-weight: 600;
+  padding: 0.5rem 1.2rem;
+  border-radius: 0.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--bubble-shadow);
+  text-decoration: none;
+}
+
+.recent-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.8rem;
+}
+
+.questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.question-item {
+  background-color: var(--bubble-left);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 3px 8px var(--bubble-shadow);
+  padding: 1rem 1.25rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-decoration: none;
+}
+
+[data-theme="dark"] .question-item {
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.question-item:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 16px var(--bubble-shadow);
+}
+
+.question-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.question-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  text-decoration: none; /* removed underline */
+}
+
+.question-title:hover {
+  text-decoration: none; /* ensure no underline */
+}
+
+.question-meta {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.arrow-icon {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  transition: transform 0.2s ease;
+}
+
+.question-item:hover .arrow-icon {
+  transform: translateX(4px);
+}
+</style>
+
+<div class="page-header">
+  <h1>Recently Added Questions</h1>
+  <a href="/questions/new" class="btn btn-primary">Ask Question</a>
+</div>
+
+<div class="questions-list">
+  <% if (questions.length === 0) { %>
+    <div class="alert alert-light border-0 shadow-sm" role="alert">
+      No questions yet. Be the first to ask one!
+    </div>
+  <% } else { %>
+    <% questions.forEach(q => { 
+      const now = new Date();
+      const created = new Date(q.createdAt);
+      const diffMs = now - created;
+      const diffSec = Math.floor(diffMs / 1000);
+      const diffMin = Math.floor(diffSec / 60);
+      const diffHour = Math.floor(diffMin / 60);
+      const diffDay = Math.floor(diffHour / 24);
+      let timeAgo = "";
+      if (diffDay > 0) timeAgo = diffDay + " day" + (diffDay > 1 ? "s" : "") + " ago";
+      else if (diffHour > 0) timeAgo = diffHour + " hour" + (diffHour > 1 ? "s" : "") + " ago";
+      else if (diffMin > 0) timeAgo = diffMin + " minute" + (diffMin > 1 ? "s" : "") + " ago";
+      else timeAgo = diffSec + " second" + (diffSec > 1 ? "s" : "") + " ago";
+    %>
+      <a href="/questions/<%= q._id %>" class="question-item">
+        <div class="question-info">
+          <span class="question-title"><%= q.title %></span>
+          <span class="question-meta">
+            by <%= q.author ? q.author.name : "Unknown" %> • <%= timeAgo %>
+          </span>
+        </div>
+        <span class="arrow-icon">&gt;</span>
+      </a>
+    <% }) %>
+  <% } %>
+</div>

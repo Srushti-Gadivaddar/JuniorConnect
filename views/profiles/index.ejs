@@ -1,0 +1,113 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-5">
+  <h2 class="mb-4">All Users</h2>
+  <div class="row g-4">
+    <% for(let user of profiles) { %>
+      <div class="col-lg-4 col-md-6 col-sm-12">
+        <a href="/profiles/<%= user._id %>" class="profile-link text-decoration-none">
+          <div class="card profile-card h-100 shadow-sm">
+            <div class="card-img-top-wrapper">
+              <img src="<%= user.profile_pic.url %>" class="card-img-top" alt="<%= user.name %>" />
+            </div>
+            <div class="card-body">
+              <h5 class="card-title"><%= user.name %></h5>
+              <p class="text-muted mb-1"><%= user.role %> | <%= user.branch %></p>
+              <p class="card-text bio-text"><%= user.bio ? user.bio : "No bio yet" %></p>
+            </div>
+          </div>
+        </a>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<style>
+:root {
+  --bg: #f5f7fb;
+  --text: #0b2347;
+  --card: #ffffff;
+  --btn: #2f5589;
+  --btn-text: #ffffff;
+  --accent: #1B3C53;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+}
+
+.profile-card {
+  border-radius: 15px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: var(--card);
+}
+
+.profile-card:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 20px 30px rgba(0,0,0,0.1);
+}
+
+.card-img-top-wrapper {
+  height: 18rem;
+  overflow: hidden;
+}
+
+.card-img-top {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: scale 0.3s ease;
+}
+
+.profile-card:hover .card-img-top {
+  transform: scale(1.05);
+}
+
+.bio-text {
+  font-size: 0.9rem;
+  color: #4a5568;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.profile-link {
+  display: block;
+  color: inherit;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+  .card-img-top-wrapper {
+    height: 16rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .card-img-top-wrapper {
+    height: 14rem;
+  }
+  .card-title {
+    font-size: 1.1rem;
+  }
+  .bio-text {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .card-img-top-wrapper {
+    height: 12rem;
+  }
+  .card-title {
+    font-size: 1rem;
+  }
+  .bio-text {
+    font-size: 0.8rem;
+  }
+}
+</style>

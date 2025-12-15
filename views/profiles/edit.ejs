@@ -1,0 +1,235 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+:root {
+    --bg: #f5f7fb;
+    --form-bg: #e2e8f0; /* New background for the form container */
+    --text: #0b2347;
+    --card: #ffffff;
+    --btn: #2f5589;
+    --btn-text: #ffffff;
+}
+
+[data-theme="dark"] {
+    --bg: #0f172a;
+    --form-bg: #1e293b;
+    --text: #e2e8f0;
+    --card: #1e293b;
+    --btn: #334155;
+    --btn-text: #e2e8f0;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+}
+
+/* Form Container with background */
+.form-container {
+    background: var(--form-bg);
+    padding: 40px 25px;
+    border-radius: 20px;
+    max-width: 800px;
+    margin: 50px auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* Card layout */
+.edit-card {
+    background: var(--card);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+/* Preview card */
+.preview-card {
+    background: #f8fafc;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.preview-card img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Buttons & inputs */
+.btn-dark {
+    background: var(--btn);
+    color: var(--btn-text);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    transition: 0.2s;
+}
+
+.btn-dark:hover {
+    transform: translateY(-2px);
+}
+
+.form-control {
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.95rem;
+}
+
+textarea.form-control {
+    resize: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form-container {
+        padding: 25px 15px;
+        margin: 30px 10px;
+    }
+
+    .preview-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .preview-card img {
+        margin-bottom: 15px;
+    }
+}
+
+/* Form Container with Gradient Background */
+.form-container {
+    background: linear-gradient(135deg, #e2e8f0, #f5f7fb); /* light gradient */
+    padding: 40px 25px;
+    border-radius: 20px;
+    max-width: 800px;
+    margin: 50px auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: background 0.3s ease;
+}
+
+[data-theme="dark"] .form-container {
+    background: linear-gradient(135deg, #1e293b, #0f172a); /* dark gradient */
+}
+
+#profilePreview, #previewImg {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover; /* ensures image covers the circle without distortion */
+    cursor: pointer;
+    border: 2px solid #ddd;
+}
+
+</style>
+
+<div class="form-container">
+    <div class="edit-card">
+        <h3>Edit Your Profile</h3>
+
+        <!-- Live Preview -->
+        <div class="preview-card">
+            <img id="previewImg" src="<%= profile.profile_pic.url %>" alt="Profile Picture">
+            <div class="preview-details">
+                <h4 id="previewName"><%= profile.name %></h4>
+                <p id="previewRole"><strong>Role:</strong> <%= profile.role %></p>
+                <p id="previewBranch"><strong>Branch:</strong> <%= profile.branch %></p>
+                <p id="previewBatch"><strong>Batch:</strong> <%= profile.batch %></p>
+                <p id="previewBio"><strong>Bio:</strong> <%= profile.bio || "No bio yet" %></p>
+            </div>
+        </div>
+
+        <!-- Edit Form -->
+        <form method="POST" action="/profiles/<%= profile._id %>/?_method=PUT" novalidate enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="fullname" class="form-label">Full Name:</label>
+                <input type="text" id="fullname" value="<%= profile.name %>" name="profile[name]" class="form-control" required>
+                <div class="invalid-feedback">Please enter your full name.</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="branch" class="form-label">Branch:</label>
+                <input type="text" id="branch" value="<%= profile.branch %>" name="profile[branch]" class="form-control" required>
+                <div class="invalid-feedback">Branch is required.</div>
+            </div>
+
+            <div class="row">
+                <div class="mb-3 col-md-4">
+                    <label for="batch" class="form-label">Batch:</label>
+                    <input type="number" id="batch" value="<%= profile.batch %>" name="profile[batch]" class="form-control" required>
+                    <div class="invalid-feedback">Batch is required.</div>
+                </div>
+
+                <div class="mb-3 col-md-8">
+                    <label for="role" class="form-label">Role:</label>
+                    <input type="text" id="role" value="<%= profile.role %>" name="profile[role]" class="form-control" required>
+                    <div class="invalid-feedback">Role is required.</div>
+                </div>
+            </div>
+
+            <div class="mb-3 text-center">
+                <label class="form-label d-block">Profile Picture</label>
+                <img id="profilePreview" src="<%= profile.profile_pic.url %>" alt="Profile Picture" onclick="document.getElementById('fileInput').click()">
+                <input type="file" id="fileInput" name="profile[profile_pic]" class="form-control mt-2 d-none">
+                <div class="invalid-feedback">Please add a profile picture.</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="bio" class="form-label">Bio:</label>
+                <textarea id="bio" name="profile[bio]" class="form-control" rows="4" required><%= profile.bio %></textarea>
+                <div class="invalid-feedback">Please add a catchy info about you.</div>
+            </div>
+
+            <button class="btn btn-dark w-100 mt-3">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Live preview for profile picture
+   // Live preview for profile picture
+document.getElementById("fileInput").addEventListener("change", function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const imgSrc = e.target.result;
+            const profileImg = document.getElementById("profilePreview");
+            const previewImg = document.getElementById("previewImg");
+
+            profileImg.src = imgSrc;
+            previewImg.src = imgSrc;
+
+            // Ensure consistent size
+            [profileImg, previewImg].forEach(img => {
+                img.style.width = "150px";
+                img.style.height = "150px";
+                img.style.borderRadius = "5%";
+                img.style.objectFit = "cover";
+            });
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+
+    // Live preview for text fields
+    const fields = ["fullname", "role", "branch", "batch", "bio"];
+    fields.forEach(id => {
+        document.getElementById(id).addEventListener("input", function() {
+            if(id === "fullname") document.getElementById("previewName").innerText = this.value;
+            if(id === "role") document.getElementById("previewRole").innerHTML = "<strong>Role:</strong> " + this.value;
+            if(id === "branch") document.getElementById("previewBranch").innerHTML = "<strong>Branch:</strong> " + this.value;
+            if(id === "batch") document.getElementById("previewBatch").innerHTML = "<strong>Batch:</strong> " + this.value;
+            if(id === "bio") document.getElementById("previewBio").innerHTML = "<strong>Bio:</strong> " + this.value;
+        });
+    });
+</script>

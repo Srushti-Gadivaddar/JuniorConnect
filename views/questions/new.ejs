@@ -1,0 +1,178 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+:root {
+  --chat-bg: #f5f7fa;
+  --bubble-left: #ffffff;
+  --bubble-right: #d1e7ff;
+  --bubble-shadow: rgba(0,0,0,0.15);
+  --header-bg: #ffffff;
+  --input-bg: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --btn-success-bg: #34d399;
+  --btn-success-hover: #10b981;
+  --dropzone-bg: rgba(0,0,0,0.03);
+}
+
+[data-theme="dark"] {
+  --chat-bg: #0f172a;
+  --bubble-left: #1e293b;
+  --bubble-right: #334155;
+  --bubble-shadow: rgba(255,255,255,0.05);
+  --header-bg: #1e293b;
+  --input-bg: #1e293b;
+  --text-primary: #e2e8f0;
+  --text-secondary: #cbd5e1;
+  --btn-success-bg: #059669;
+  --btn-success-hover: #047857;
+  --dropzone-bg: rgba(255,255,255,0.05);
+}
+
+body {
+  background-color: var(--chat-bg);
+  color: var(--text-primary);
+  font-family: "Segoe UI", sans-serif;
+}
+
+h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+form {
+  background-color: var(--bubble-left);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 15px var(--bubble-shadow);
+  max-width: 700px;
+  margin: 0 auto 2rem auto;
+}
+
+label {
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  display: block;
+  color: var(--text-primary);
+}
+
+input.form-control,
+textarea.form-control {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(0,0,0,0.15);
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+[data-theme="dark"] input.form-control,
+[data-theme="dark"] textarea.form-control {
+  border: 1px solid rgba(255,255,255,0.2);
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+}
+
+input.form-control:focus,
+textarea.form-control:focus {
+  outline: none;
+  border-color: var(--bubble-right);
+  box-shadow: 0 0 6px var(--bubble-shadow);
+}
+
+/* BUTTON STYLING */
+button.btn-success {
+  background-color: var(--btn-success-bg);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+button.btn-success:hover {
+  background-color: var(--btn-success-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--bubble-shadow);
+}
+
+/* DRAG & DROP STYLING */
+.dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 2px dashed var(--text-secondary);
+  border-radius: 0.6rem;
+  padding: 1rem;
+  background-color: var(--dropzone-bg);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.dropzone:hover {
+  background-color: var(--bubble-left);
+  border-color: var(--text-primary);
+}
+
+.dropzone i {
+  font-size: 1.4rem;
+  color: var(--text-secondary);
+}
+
+.dropzone span {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+/* HIDE DEFAULT FILE INPUT */
+input[type="file"] {
+  display: none;
+}
+</style>
+
+<center><h2>Ask a Question</h2></center>
+
+<form action="/questions" method="POST" enctype="multipart/form-data">
+
+  <div class="form-group">
+    <label for="title">Title</label>
+    <input id="title" name="title" required class="form-control" />
+  </div>
+
+  <div class="form-group">
+    <label for="body">Body</label>
+    <textarea id="body" name="body" rows="8" class="form-control" required></textarea>
+  </div>
+
+  <div class="mb-3">
+    <label for="tags">Tags (comma separated):</label>
+    <input type="text" id="tags" name="tags" class="form-control" placeholder="javascript, node, mongodb">
+  </div>
+
+  <!-- Drag & Drop for Images -->
+  <label>Images (jpeg, png, webp)</label>
+  <div class="dropzone" onclick="document.getElementById('images').click()">
+    <i class="fa-solid fa-camera"></i>
+    <span>Drag & drop images here or click to select</span>
+    <input type="file" id="images" name="images" multiple />
+  </div>
+
+  <!-- Drag & Drop for Files -->
+  <label>Files (pdf)</label>
+  <div class="dropzone" onclick="document.getElementById('files').click()">
+    <i class="fa-solid fa-file"></i>
+    <span>Drag & drop files here or click to select</span>
+    <input type="file" id="files" name="files" multiple />
+  </div>
+
+  <button type="submit" class="btn btn-success">Post Question</button>
+</form>

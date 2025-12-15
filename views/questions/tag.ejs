@@ -1,0 +1,187 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+:root {
+  --chat-bg: #f5f7fa;
+  --bubble-left: #ffffff;
+  --bubble-right: #d1e7ff;
+  --bubble-shadow: rgba(0,0,0,0.15);
+  --header-bg: #ffffff;
+  --input-bg: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+}
+
+[data-theme="dark"] {
+  --chat-bg: #0f172a;
+  --bubble-left: #1e293b;
+  --bubble-right: #334155;
+  --header-bg: #1e293b;
+  --input-bg: #1e293b;
+  --bubble-shadow: rgba(255,255,255,0.05);
+  --text-primary: #e2e8f0;
+  --text-secondary: #cbd5e1;
+}
+
+body {
+  background-color: var(--chat-bg);
+}
+
+.questions-list-wrapper {
+  margin-top: 1.5rem;
+}
+
+/* QUESTION CARD */
+.question-card {
+  background: var(--bubble-left);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 3px 10px var(--bubble-shadow);
+  overflow: hidden;
+  cursor: pointer;
+  min-height: 90px; /* increased height */
+  display: flex;
+  align-items: center; /* vertical center */
+  transition: transform 0.25s ease,
+              box-shadow 0.25s ease,
+              background-color 0.25s ease;
+}
+
+[data-theme="dark"] .question-card {
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* HOVER EFFECT */
+.question-card:hover {
+  transform: scale(1.015);
+  box-shadow: 0 6px 18px var(--bubble-shadow);
+}
+
+.question-row {
+  padding: 0 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* TITLE */
+.question-title {
+  font-size: 1.15rem; /* slightly bigger */
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+  text-decoration: none;
+  max-width: 65%;
+}
+
+.question-title:hover {
+  text-decoration: underline;
+}
+
+/* STATS SECTION */
+.question-stats {
+  display: flex;
+  gap: 18px; /* slightly more spacing */
+  align-items: center;
+  margin-right: 12px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1rem; /* bigger for better visibility */
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .stat-item {
+  color: var(--text-secondary);
+}
+
+.stat-item i {
+  font-size: 1.1rem; /* slightly bigger icon */
+}
+
+/* RIGHT SIDE ARROW */
+.arrow-icon {
+  font-size: 1.6rem; /* slightly bigger arrow */
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-left: 12px;
+  transition: transform 0.25s ease,
+              color 0.25s ease;
+}
+
+[data-theme="dark"] .arrow-icon {
+  color: var(--text-primary);
+}
+
+.question-card:hover .arrow-icon {
+  transform: translateX(6px);
+}
+
+/* FULL ROW CLICKABLE */
+.question-link-wrapper {
+  width: 100%;
+  text-decoration: none;
+  display: block;
+}
+</style>
+
+<div class="questions-list-wrapper">
+
+  <% if (questions.length === 0) { %>
+    <div class="alert alert-light border-0 shadow-sm" role="alert">
+      No questions have been asked with this tag yet. Be the first to create one.
+    </div>
+  <% } else { %>
+    <% questions.forEach(q => { 
+      const now = new Date();
+      const created = new Date(q.createdAt);
+      const diffMs = now - created;
+      const diffSec = Math.floor(diffMs / 1000);
+      const diffMin = Math.floor(diffSec / 60);
+      const diffHour = Math.floor(diffMin / 60);
+      const diffDay = Math.floor(diffHour / 24);
+      let timeAgo = "";
+      if (diffDay > 0) timeAgo = diffDay + " day" + (diffDay > 1 ? "s" : "") + " ago";
+      else if (diffHour > 0) timeAgo = diffHour + " hour" + (diffHour > 1 ? "s" : "") + " ago";
+      else if (diffMin > 0) timeAgo = diffMin + " minute" + (diffMin > 1 ? "s" : "") + " ago";
+      else timeAgo = diffSec + " second" + (diffSec > 1 ? "s" : "") + " ago";
+    %>
+
+      <div class="question-card mt-3">
+        <a href="/questions/<%= q._id %>" class="question-link-wrapper">
+          <div class="question-row">
+            
+            <!-- TITLE -->
+            <p class="question-title"><%= q.title %></p>
+
+            <!-- STATS -->
+            <div class="question-stats">
+              <div class="stat-item">
+                <i class="fa-solid fa-comment-dots"></i>
+                <span><%= q.answers ? q.answers.length : 0 %></span>
+              </div>
+              <div class="stat-item">
+                <i class="fa-solid fa-eye"></i>
+                <span><%= q.views || 0 %></span>
+              </div>
+              <div class="stat-item">
+                <i class="fa-regular fa-clock"></i>
+                <span><%= timeAgo %></span>
+              </div>
+            </div>
+
+            <!-- RIGHT ARROW -->
+            <span class="arrow-icon">&gt;</span>
+
+          </div>
+        </a>
+      </div>
+
+    <% }) %>
+  <% } %>
+</div>

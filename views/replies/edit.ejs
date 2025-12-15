@@ -1,0 +1,61 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+.edit-box {
+  background: var(--bubble-left);
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px var(--bubble-shadow);
+  color: var(--text-primary);
+}
+
+.section-title {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.input-area {
+  background: var(--input-bg);
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 12px;
+  width: 100%;
+  color: var(--text-primary);
+}
+
+.btn-soft {
+  background: var(--bubble-right);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.btn-cancel {
+  background: var(--bubble-left);
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid #aaa;
+  color: var(--text-secondary);
+}
+</style>
+
+<div class="container mt-4">
+  <h2 style="color:var(--text-primary); font-weight:700;" class="mb-4">Edit Reply</h2>
+
+  <div class="edit-box">
+
+    <form method="POST"
+          action="/questions/<%= questionId %>/answers/<%= answerId %>/replies/<%= reply._id %>?_method=PUT">
+
+      <label class="section-title">Edit Your Reply</label>
+      <textarea name="text" rows="4" class="input-area mb-4"><%= reply.text %></textarea>
+
+      <button class="btn-soft">Save Changes</button>
+      <a href="/questions/<%= questionId %>" class="btn-cancel ms-2">Cancel</a>
+
+    </form>
+  </div>
+</div>

@@ -1,0 +1,142 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+/* ===== Global Styles ===== */
+body {
+  background: var(--bg);
+  color: var(--text);
+  transition: 0.3s;
+}
+
+:root {
+  --bg: #f6f7fb;
+  --card-bg: #fff;
+  --text: #222;
+  --input-bg: #fff;
+  --placeholder: #888;
+}
+
+/* DARK MODE */
+[data-theme="dark"] {
+  --bg: #0d1117;
+  --card-bg: #161b22;
+  --text: #e6edf3;
+  --input-bg: #0d1117;
+  --placeholder: #9ca3af;
+}
+
+.card-custom {
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+input.form-control {
+  background: var(--input-bg);
+  color: var(--text);
+}
+::placeholder {
+  color: var(--placeholder) !important;
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #3c4043;
+  font-weight: 500;
+  transition: .2s;
+}
+.google-btn:hover { background: #f7f7f7; }
+
+.small-rule {
+  font-size: 13px;
+  color: var(--placeholder);
+  margin-top: -5px;
+  margin-bottom: 10px;
+}
+</style>
+
+<div class="container col-md-5 mt-5">
+  <!-- ===== SIGNUP CARD ===== -->
+  <div class="card-custom mb-5">
+    <h3 class="mb-3">Create Account</h3>
+
+    <form action="/signup" method="POST" class="needs-validation" novalidate>
+
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" name="username" class="form-control" placeholder="username_with_underscore" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" class="form-control" placeholder="example@gmail.com" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" placeholder="minimum 6 characters" required>
+      </div>
+
+      <button class="btn btn-success w-100">Sign Up</button>
+
+      <hr>
+      <a href="/auth/google/signup" class="google-btn">
+          <img src="https://developers.google.com/identity/images/g-logo.png" width="20">
+          Sign up with Google
+      </a>
+      <br/>
+      <a href="/login">
+        Already have account? Login
+      </a>
+    </form>
+  </div>
+
+
+  <!-- ===== FORGOT PASSWORD CARD ===== -->
+  <div class="card-custom mb-5" id="forgot">
+    <h3 class="mb-3">Forgot Password</h3>
+    <form action="/forgot-password" method="POST">
+
+      <div class="mb-3">
+        <label class="form-label">Enter your Email</label>
+        <input type="email" name="email" class="form-control" placeholder="email@example.com" required>
+      </div>
+
+      <button class="btn btn-primary w-100">Send OTP</button>
+    </form>
+  </div>
+
+
+  <!-- ===== OTP VERIFY CARD ===== -->
+  <div class="card-custom mb-5">
+    <h3 class="mb-3">OTP Verification</h3>
+
+    <form action="/verify-otp" method="POST">
+
+      <div class="mb-3">
+        <label class="form-label">Enter OTP</label>
+        <input type="text" name="otp" maxlength="6" class="form-control" placeholder="6-digit code" required>
+      </div>
+
+      <button class="btn btn-warning w-100">Verify OTP</button>
+    </form>
+  </div>
+
+</div>
+

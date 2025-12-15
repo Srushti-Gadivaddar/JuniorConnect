@@ -1,0 +1,28 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-4">
+    <h2 class="mb-4">Leaderboard 🏆</h2>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Branch</th>
+                <th>Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% profiles.forEach((p, index) => { %>
+                <tr>
+                    <td><%= index + 1 %></td>
+                    <td>
+                        <a href="/profiles/<%= p._id %>"><%= p.name %></a>
+                    </td>
+                    <td><%= p.branch %></td>
+                    <td><%= p.points || 0 %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
